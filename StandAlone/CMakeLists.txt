@@ -31,7 +31,9 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-find_host_package(PythonInterp 3 REQUIRED)
+# CMake needs to find the right version of python, right from the beginning,
+# otherwise, it will find the wrong version and fail later
+find_host_package(Python 3 REQUIRED)
 
 set(GLSLANG_INTRINSIC_H          "${GLSLANG_GENERATED_INCLUDEDIR}/glslang/glsl_intrinsic_header.h")
 set(GLSLANG_INTRINSIC_PY         "${CMAKE_CURRENT_SOURCE_DIR}/../gen_extension_headers.py")
@@ -39,7 +41,7 @@ set(GLSLANG_INTRINSIC_HEADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../glslang/Extensi
 
 add_custom_command(
     OUTPUT  ${GLSLANG_INTRINSIC_H}
-    COMMAND ${PYTHON_EXECUTABLE} "${GLSLANG_INTRINSIC_PY}"
+    COMMAND ${Python_EXECUTABLE} "${GLSLANG_INTRINSIC_PY}"
             "-i" ${GLSLANG_INTRINSIC_HEADER_DIR}
             "-o" ${GLSLANG_INTRINSIC_H}
     DEPENDS ${GLSLANG_INTRINSIC_PY}
