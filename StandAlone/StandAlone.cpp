@@ -44,11 +44,9 @@
 #include "glslang/Public/ResourceLimits.h"
 #include "Worklist.h"
 #include "DirStackFileIncluder.h"
-#include "./../glslang/Include/ShHandle.h"
 #include "./../glslang/Public/ShaderLang.h"
 #include "../SPIRV/GlslangToSpv.h"
 #include "../SPIRV/GLSL.std.450.h"
-#include "../SPIRV/doc.h"
 #include "../SPIRV/disassemble.h"
 
 #include <cstring>
