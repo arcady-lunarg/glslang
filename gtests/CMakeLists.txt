@@ -103,7 +103,7 @@ if(BUILD_TESTING)
         endif()
 
         set(LIBRARIES
-            glslang OSDependent OGLCompiler glslang
+            glslang OSDependent glslang
             SPIRV glslang-default-resource-limits)
 
         if(ENABLE_SPVREMAPPER)

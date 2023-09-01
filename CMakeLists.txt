@@ -294,7 +294,6 @@ else()
 endif()
 
 add_subdirectory(glslang)
-add_subdirectory(OGLCompilersDLL)
 if(ENABLE_GLSLANG_BINARIES)
     add_subdirectory(StandAlone)
 endif()
