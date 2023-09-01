@@ -102,9 +102,7 @@ if(BUILD_TESTING)
             )
         endif()
 
-        set(LIBRARIES
-            glslang OSDependent glslang
-            SPIRV glslang-default-resource-limits)
+        set(LIBRARIES glslang SPIRV glslang-default-resource-limits)
 
         if(ENABLE_SPVREMAPPER)
             set(LIBRARIES ${LIBRARIES} SPVRemapper)
