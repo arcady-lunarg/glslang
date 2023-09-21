@@ -82,6 +82,8 @@ target_include_directories(SPIRV PUBLIC
 
 glslang_add_build_info_dependency(SPIRV)
 
+glslang_only_export_explicit_symbols(SPIRV)
+
 if (ENABLE_SPVREMAPPER)
     add_library(SPVRemapper ${LIB_TYPE} ${SPVREMAP_SOURCES} ${SPVREMAP_HEADERS})
     set_target_properties(SPVRemapper PROPERTIES

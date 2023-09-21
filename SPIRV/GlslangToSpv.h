@@ -40,7 +40,8 @@
 #endif
 
 #include "SpvTools.h"
-#include "glslang/Include/intermediate.h"
+//#include "glslang/Include/intermediate.h"
+#include "glslang/Include/visibility.h"
 
 #include <string>
 #include <vector>
@@ -49,13 +50,13 @@
 
 namespace glslang {
 
-void GetSpirvVersion(std::string&);
-int GetSpirvGeneratorVersion();
-void GlslangToSpv(const glslang::TIntermediate& intermediate, std::vector<unsigned int>& spirv,
-                  SpvOptions* options = nullptr);
-void GlslangToSpv(const glslang::TIntermediate& intermediate, std::vector<unsigned int>& spirv,
-                  spv::SpvBuildLogger* logger, SpvOptions* options = nullptr);
-bool OutputSpvBin(const std::vector<unsigned int>& spirv, const char* baseName);
-bool OutputSpvHex(const std::vector<unsigned int>& spirv, const char* baseName, const char* varName);
+GLSLANG_EXPORT void GetSpirvVersion(std::string&);
+GLSLANG_EXPORT int GetSpirvGeneratorVersion();
+GLSLANG_EXPORT void GlslangToSpv(const glslang::TIntermediate& intermediate, std::vector<unsigned int>& spirv,
+                                 SpvOptions* options = nullptr);
+GLSLANG_EXPORT void GlslangToSpv(const glslang::TIntermediate& intermediate, std::vector<unsigned int>& spirv,
+                                 spv::SpvBuildLogger* logger, SpvOptions* options = nullptr);
+GLSLANG_EXPORT bool OutputSpvBin(const std::vector<unsigned int>& spirv, const char* baseName);
+GLSLANG_EXPORT bool OutputSpvHex(const std::vector<unsigned int>& spirv, const char* baseName, const char* varName);
 
 }
