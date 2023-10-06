@@ -241,6 +241,8 @@ Id Builder::makePointer(StorageClass storageClass, Id pointee)
     constantsTypesGlobals.push_back(std::unique_ptr<Instruction>(type));
     module.mapInstruction(type);
 
+    fprintf(stderr, "\e[1m[\e[94mSPV\e[39m]\e[m Making regular pointer %d to type %d, SC: %d\n", type->getResultId(), pointee, storageClass);
+    //assert(!isPointer(pointee));
     return type->getResultId();
 }
 
@@ -254,12 +256,14 @@ Id Builder::makeForwardPointer(StorageClass storageClass)
     constantsTypesGlobals.push_back(std::unique_ptr<Instruction>(type));
     module.mapInstruction(type);
 
+    fprintf(stderr, "\e[1m[\e[94mSPV\e[39m]\e[m Making forward pointer %d\n", type->getResultId());
     return type->getResultId();
 }
 
 Id Builder::makePointerFromForwardPointer(StorageClass storageClass, Id forwardPointerType, Id pointee)
 {
     // try to find it
+    fprintf(stderr, "\e[1m[\e[94mSPV\e[39m]\e[mMaking pointer to %d from forward pointer %d\n", pointee, forwardPointerType);
     Instruction* type;
     for (int t = 0; t < (int)groupedTypes[OpTypePointer].size(); ++t) {
         type = groupedTypes[OpTypePointer][t];
@@ -380,6 +384,10 @@ Id Builder::makeStructType(const std::vector<Id>& members, const char* name, boo
         auto const debugResultId = makeCompositeDebugType(members, name, NonSemanticShaderDebugInfo100Structure);
         debugId[type->getResultId()] = debugResultId;
     }
+    fprintf(stderr, "\e[1m[\e[94mSPV\e[39m]\e[m Making struct %d with members (", type->getResultId());
+    for (auto e: members)
+        fprintf(stderr, "%d, ", e);
+    fprintf(stderr, "\010\010)\n");
 
     return type->getResultId();
 }

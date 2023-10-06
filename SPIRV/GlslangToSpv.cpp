@@ -4445,16 +4445,39 @@ spv::Id TGlslangToSpvTraverser::convertGlslangToSpvType(const glslang::TType& ty
         {
             // Make the forward pointer, then recurse to convert the structure type, then
             // patch up the forward pointer with a real pointer type.
+            // Make a dummy forward point in the forwardPointers list if we haven't found one
+            // then keep recursing. If we found the dummy pointer already, then inflate it into a real forward pointer.
+            // if we have a real forward pointer,
+            //    makePointerFromFowardPointer
+            // else
+            //    makePointer
+            //    delete dummy from forwardPointers
+            //    makeDebugPointer
             if (forwardPointers.find(type.getReferentType()) == forwardPointers.end()) {
-                spv::Id forwardId = builder.makeForwardPointer(spv::StorageClassPhysicalStorageBufferEXT);
-                forwardPointers[type.getReferentType()] = forwardId;
+                fprintf(stderr, "No forward pointer found, deferring creation.\n");
+                forwardPointers[type.getReferentType()] = spv::NoType;
+            } else if (forwardPointers[type.getReferentType()] == spv::NoType) {
+                spvType = builder.makeForwardPointer(spv::StorageClassPhysicalStorageBufferEXT);
+                forwardPointers[type.getReferentType()] = spvType;
+                fprintf(stderr, "Making a real forward pointer %d\n", spvType);
+                break;
+            } else {
+                spvType = forwardPointers[type.getReferentType()];
+                fprintf(stderr, "using forward pointer %d\n", spvType);
+                break;
             }
-            spvType = forwardPointers[type.getReferentType()];
-            if (!forwardReferenceOnly) {
-                spv::Id referentType = convertGlslangToSpvType(*type.getReferentType());
+
+            fprintf(stderr, " making type %p (pointer to %p), forwardReferenceOnly = %d\n", &type, type.getReferentType(), forwardReferenceOnly);
+            spv::Id referentType = convertGlslangToSpvType(*type.getReferentType());
+            if (spvType != spv::NoType) {
                 builder.makePointerFromForwardPointer(spv::StorageClassPhysicalStorageBufferEXT,
                                                       forwardPointers[type.getReferentType()],
                                                       referentType);
+                spvType = forwardPointers[type.getReferentType()];
+            } else {
+                spvType = builder.makePointer(spv::StorageClassPhysicalStorageBufferEXT, referentType);
+                //forwardPointers.erase(type.getReferentType());
+                //forwardPointers[type.getReferentType()] = spvType;
             }
         }
         break;
@@ -4720,6 +4743,7 @@ spv::Id TGlslangToSpvTraverser::convertGlslangStructToSpvType(const glslang::TTy
     int memberDelta = 0;  // how much the member's index changes from glslang to SPIR-V, normally 0,
                           // except sometimes for blocks
     std::vector<std::pair<glslang::TType*, glslang::TQualifier> > deferredForwardPointers;
+    fprintf(stderr, "\e[1m[\e[92mCOMPILE\e[39m]\e[m Converting struct %s\n", type.getTypeName().c_str());
     for (int i = 0; i < (int)glslangMembers->size(); i++) {
         auto& glslangMember = (*glslangMembers)[i];
         if (glslangMember.type->hiddenMember()) {
@@ -4747,16 +4771,16 @@ spv::Id TGlslangToSpvTraverser::convertGlslangStructToSpvType(const glslang::TTy
             bool lastBufferBlockMember = qualifier.storage == glslang::EvqBuffer &&
                                          i == (int)glslangMembers->size() - 1;
 
+            // Create the member type.
+            auto const spvMember = convertGlslangToSpvType(*glslangMember.type, explicitLayout, memberQualifier, lastBufferBlockMember,
+                /*glslangMember.type->isReference()*/ false);
+            spvMembers.push_back(spvMember);
             // Make forward pointers for any pointer members.
             if (glslangMember.type->isReference() &&
                 forwardPointers.find(glslangMember.type->getReferentType()) == forwardPointers.end()) {
                 deferredForwardPointers.push_back(std::make_pair(glslangMember.type, memberQualifier));
             }
 
-            // Create the member type.
-            auto const spvMember = convertGlslangToSpvType(*glslangMember.type, explicitLayout, memberQualifier, lastBufferBlockMember,
-                glslangMember.type->isReference());
-            spvMembers.push_back(spvMember);
 
             // Update the builder with the type's location so that we can create debug types for the structure members.
             // There doesn't exist a "clean" entry point for this information to be passed along to the builder so, for now,
@@ -4787,7 +4811,11 @@ spv::Id TGlslangToSpvTraverser::convertGlslangStructToSpvType(const glslang::TTy
 
     for (int i = 0; i < (int)deferredForwardPointers.size(); ++i) {
         auto it = deferredForwardPointers[i];
-        convertGlslangToSpvType(*it.first, explicitLayout, it.second, false);
+        //convertGlslangToSpvType(*it.first, explicitLayout, it.second, false);
+        // XXX: convert the forward pointer to a real pointer now.
+        //builder.makePointerFromForwardPointer(spv::StorageClassPhysicalStorageBufferEXT,
+        //                                      forwardPointers[type.getReferentType()],
+        //                                      referentType);
     }
 
     return spvType;
