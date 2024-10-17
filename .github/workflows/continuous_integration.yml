@@ -22,29 +22,10 @@ jobs:
             shared_libs: ON
     steps:
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
-      - uses: lukka/get-cmake@582a9f5c6f4f332f36797e1ac757d1c8850a1513 # v3.30.4
-      - uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
+      - uses: ./.github/actions/build_glslang.yml
         with:
-          python-version: '3.7'
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@ed74d11c0b343532753ecead8a951bb09bb34bc9 # v1.2.14
-        with:
-          key: ubuntu-22-${{ matrix.cmake_build_type }}-${{ matrix.compiler.cc }}-${{matrix.compiler.cxx}}
-      - run: ./update_glslang_sources.py
-      - name: Configure
-        run: |
-          cmake -S . -B build -D CMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }} \
-                -DBUILD_WERROR=ON -D GLSLANG_TESTS=ON -D BUILD_SHARED_LIBS=${{ matrix.shared_libs }}
-        env:
-          CC: ${{matrix.compiler.cc}}
-          CXX: ${{matrix.compiler.cxx}}
-          CMAKE_GENERATOR: Ninja
-          CMAKE_C_COMPILER_LAUNCHER: ccache
-          CMAKE_CXX_COMPILER_LAUNCHER: ccache
-      - name: Build
-        run: cmake --build build
-      - name: Install
-        run: cmake --install build --prefix build/install
+          build_shared: ${{ matrix.shared_libs }}
+          build_tests: ON
       - name: Test
         run: ctest --output-on-failure --test-dir build
       - name: Check known validation failure list

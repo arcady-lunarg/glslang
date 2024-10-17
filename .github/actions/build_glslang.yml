@@ -1,0 +1,38 @@
+name: 'Build glslang'
+inputs:
+  build_tests:
+    required: false
+    type: string
+    default: 'OFF'
+  build_shared:
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
+      with:
+        python-version: '3.7'
+    - uses: lukka/get-cmake@582a9f5c6f4f332f36797e1ac757d1c8850a1513 # v3.30.4
+    # TODO: set up ccache
+    # - name: Setup ccache
+    #  uses: hendrikmuhs/ccache-action@ed74d11c0b343532753ecead8a951bb09bb34bc9 # v1.2.14
+    #  with:
+    #    key: ${{ matrix.os }}
+    - run: ./update_glslang_sources.py
+    - name: Configure
+      if: ${{ runner.os != 'Windows' }}
+      run: cmake -S . -B build -D CMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }} -D GLSLANG_TESTS=${{ inputs.build_tests }} -G Ninja
+      env:
+        #CMAKE_C_COMPILER_LAUNCHER: ccache
+        #CMAKE_CXX_COMPILER_LAUNCHER: ccache
+        CC: ${{ matrix.compiler.cc }}
+        CXX: ${{ matrix.compiler.cxx }}
+    - name: Configure
+      if: ${{ runner.os == 'Windows' }}
+      run: | 
+          cmake -S. -Bbuild -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX="$PWD/build/install" \
+                -DBUILD_WERROR=ON -D GLSLANG_TESTS=${{ input.build_tests }} -DBUILD_SHARED_LIBS=${{ matrix.shared_libs }}
+    - name: Build
+      run: cmake --build build --config ${{matrix.cmake_build_type}} --target install
