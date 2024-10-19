@@ -42,23 +42,10 @@ jobs:
                 cmake_build_type: [Debug, Release]
         steps:
             - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
-            - uses: lukka/get-cmake@582a9f5c6f4f332f36797e1ac757d1c8850a1513 # v3.30.4
-            - uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
+            - uses: ./.github/build-glslang
               with:
-                  python-version: '3.7'
-            - name: Install Ubuntu Package Dependencies
-              run: |
-                  sudo apt-get -qq update
-                  sudo apt-get install -y clang-6.0
-            - run: ./update_glslang_sources.py
-            - name: Build
-              env:
-                  CC: ${{matrix.compiler.cc}}
-                  CXX: ${{matrix.compiler.cxx}}
-              run: |
-                  mkdir build && cd build
-                  cmake -DCMAKE_BUILD_TYPE=${{matrix.cmake_build_type}} -DCMAKE_INSTALL_PREFIX=`pwd`/install ..
-                  make -j4 install
+                build_shared: OFF
+                build_tests: ON
             - name: Test
               run: |
                   cd build
@@ -105,19 +92,10 @@ jobs:
                 cmake_build_type: [Debug, Release]
         steps:
             - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
-            - uses: lukka/get-cmake@582a9f5c6f4f332f36797e1ac757d1c8850a1513 # v3.30.4
-            - uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
+            - uses: ./.github/build-glslang
               with:
-                  python-version: '3.7'
-            - run: ./update_glslang_sources.py
-            - name: Build
-              env:
-                  CC: ${{matrix.compiler.cc}}
-                  CXX: ${{matrix.compiler.cxx}}
-              run: |
-                  mkdir build && cd build
-                  cmake -DCMAKE_BUILD_TYPE=${{matrix.cmake_build_type}} -DCMAKE_INSTALL_PREFIX=`pwd`/install ..
-                  make -j4 install
+                build_shared: OFF
+                build_tests: ON
             - name: Test
               run: |
                   cd build
@@ -161,15 +139,10 @@ jobs:
                 cmake_build_type: [Debug, Release]
         steps:
             - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
-            - uses: lukka/get-cmake@582a9f5c6f4f332f36797e1ac757d1c8850a1513 # v3.30.4
-            - uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
+            - uses: ./.github/build-glslang
               with:
-                  python-version: '3.7'
-            - run: python update_glslang_sources.py
-            - name: Build
-              run: |
-                  cmake -S. -Bbuild -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX="$PWD/build/install"
-                  cmake --build build --config ${{matrix.cmake_build_type}} --target install
+                build_shared: OFF
+                build_tests: ON
             - name: Test
               run: |
                   cd build
